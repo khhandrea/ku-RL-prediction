@@ -1,5 +1,8 @@
 # Reinforcement learning planning & prediction
 
+## TODO
+- DP 
+
 ## Execution
 ### Docker
 
@@ -14,7 +17,7 @@ DP.py
 ### MC\.py
 Reinforcement learning with Monte Carlo learning
 
-- 1st argument(Ne):the number of episodes
+- 1st argument(Ne): the number of episodes
 
 example:
 ```bash
