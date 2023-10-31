@@ -1,97 +1,56 @@
+from random import choices
+
 import numpy as np
 
-from implements.RL_algo import RLTrainer
-from implements.world import GridWorld
-from implements.data_handler import loss_write
+from implements.data_handler import write_result, read_result
+from implements.data_handler import get_gridlike
 
-class DPTrainer(RLTrainer):
-    def __init__(self):
-        self.__world = GridWorld()
-        self.__policy = np.full((4, 4, 4), 0.25)
-        self.__old_policy = np.zeros((4, 4, 4))
-        self.__vs = np.zeros((4, 4))
-        self.__gamma = 1
-        
-    def __policy_evaluation(self):
-        old_vs = self.__vs.copy()
-        
-        # Bellman equation
-        for y in range(4):
-            for x in range(4):
-                if (y, x) == (3, 3):
-                    continue
-                    
-                v = 0
-                
-                for action in range(4):
-                    self.__world.x = x
-                    self.__world.y = y
-                    (next_x, next_y), reward, done = self.__world.step(action)
-                    v += self.__policy[y][x][action] * (reward + self.__gamma * old_vs[next_y][next_x])
+def train_DP(
+        size: int = 4,
+        gamma: float = 1.0,
+        reward: int = -1,
+        ):
+    # Initialize
+    state_num = size * size
+    vs = np.zeros(state_num)
+    old_vs = np.full(state_num, -1)
 
-                self.__vs[y][x] = v
+    # Make transition matrix
+    transition = np.zeros((state_num, state_num, 4))
+    for state in range(state_num):
+        # Left
+        next_state = (state - 1) if (state % size != 0) else state
+        transition[state, next_state, 0] = 1.0
+        # Up
+        next_state = (state - size) if (state >= size) else state
+        transition[state, next_state, 1] = 1.0
+        # Right
+        next_state = (state + 1) if (state % size != size - 1) else state
+        transition[state, next_state, 2] = 1.0
+        # Down
+        next_state = (state + size) if (state < size * (size - 1)) else state
+        transition[state, next_state, 3] = 1.0
 
-    def __policy_improvement(self):
-        for y in range(4):
-            for x in range(4):
-                if (y, x) == (3, 3):
-                    continue
-                    
-                max_v = -99999
+    # Bellman equation
+    while not np.array_equal(vs, old_vs):
+        old_vs = vs.copy()
+        for state in range(state_num):
+            if state == state_num - 1:
+                break
 
-                if x > 0:
-                    if self.__vs[y][x - 1] > max_v:
-                        argmax = [0]
-                        max_v = self.__vs[y][x - 1]
-                    elif self.__vs[y][x - 1] == max_v:
-                        argmax.append(0)
+            new_v = 0.0
+            for action in range(4):
+                next_v = 0.0
+                for next_state in range(state_num):
+                    next_v += transition[state, next_state, action] * old_vs[next_state]
+                q = reward + gamma * next_v
+                new_v += 0.25 * q
+            vs[state] = round(new_v, 2)
 
-                if y > 0:
-                    if self.__vs[y - 1][x] > max_v:
-                        argmax = [1]
-                        max_v = self.__vs[y - 1][x]
-                    elif self.__vs[y - 1][x] == max_v:
-                        argmax.append(1)
-
-                if x < 3:
-                    if self.__vs[y][x + 1] > max_v:
-                        argmax = [2]
-                        max_v = self.__vs[y][x + 1]
-                    elif self.__vs[y - 1][x] == max_v:
-                        argmax.append(2)
-
-                if y < 3:
-                    if self.__vs[y + 1][x] > max_v:
-                        argmax = [3]
-                        max_v = self.__vs[y + 1][x]
-                    elif self.__vs[y - 1][x] == max_v:
-                        argmax.append(3)
-
-                self.__policy[y][x][:] = 0
-                if len(argmax) == 0:
-                    self.__policy[y][x][:] = 0.25
-                else:
-                    self.__policy[y][x][argmax] = 1 / len(argmax)
-
-    def __is_converged(self):
-        result = np.array_equal(self.__policy, self.__old_policy)
-        self.__old_policy = self.__policy.copy()
-        return result
-
-    def __show_v_table(self):
-        for row in self.__vs:
-            for v in row:
-                print(v, end=' ')
-            print()
-
-    def train(self):
-        while not self.__is_converged():
-            self.__policy_evaluation()
-            self.__policy_improvement()
-        self.__show_v_table()
-
-        loss_write('DP-0.txt', self.__vs)
+    # Save
+    write_result('DP', 0, vs)
 
 if __name__ == '__main__':
-    DP_trainer = DPTrainer()
-    DP_trainer.train()
+    train_DP()
+    vs, _, _ = read_result('DP')
+    print(get_gridlike(vs))

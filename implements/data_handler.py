@@ -5,33 +5,61 @@
 # experiment: DP, MC, TD 1step, TD 3step
 # step: 100, 1000, 10000, 100000
 # (경우의수 총 16개)
+from typing import Tuple
+
 import numpy as np
 from matplotlib import pyplot as plt
 
-def loss_write(
-    source: str,
-    vs: np.ndarray,
-    mean: np.ndarray=None,
-    std: np.ndarray=None
-) -> None:
+def __file_path(experiment: str, step: int=0) -> None:
+    return f'{experiment}-{step}.txt'
+
+def write_result(
+        experiment: str,
+        step: int,
+        vs: np.ndarray,
+        mean: np.ndarray=None,
+        std: np.ndarray=None
+        ) -> None:
+    path = __file_path(experiment, step)
     vs = ' '.join(map(str, [v for v in vs.reshape(16,)])) + '\n'
-    with open(source, 'w') as file:
+    with open(path, 'w') as file:
         file.write(vs)
         if mean == None:
             pass
         if std == None:
             pass
-    print(f"saved to {source}")
+    print(f"saved to {path}")
 
-def loss_read(source: str):
-    with open(source, 'r') as file:
-        lines = file.readlines()
-        vs = np.array(map(float, lines[0].split())).reshape((4, 4))
+def read_result(
+        experiment: str,
+        step: int=0,
+        size: int=4
+        ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    path = __file_path(experiment, step)
+    line2np = lambda line: np.array(list(map(float, line.split()))).reshape(size * size)
+
+    if experiment == 'DP':
+        with open(path, 'r') as file:
+            line = file.readline()
+        vs = line2np(line)
         
-        if len(lines) == 3:
-            pass
-            
-    plt.table(cellText=vs)
-    plt.show()
-    
-    print(f"loaded to {source}")
+        return vs, None, None
+    else:
+        if step != 0:
+            experiments = ('MC', 'TD1', 'TD3')
+            data = {}
+            for experiment in experiments:
+                with open(path) as file:
+                    data[experiment] = file.readlines()
+
+                # vs
+                data[experiment][0] = line2np(data[experiment][0])
+                # mean
+                data[experiment][1]
+                # bias
+                data[experiment][2]
+        else:
+            print('invalid parameters')
+
+def get_gridlike(state: np.ndarray, size=4) -> np.ndarray:
+    return state.reshape((4, -1))

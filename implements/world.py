@@ -1,9 +1,16 @@
 class GridWorld:
-    def __init__(self):
-        self.w = 3
-        self.h = 3
-        self.x = 0
-        self.y = 0
+    def __init__(
+            self, 
+            size:int=4, 
+            start:int=0,
+            goal:int=-1
+            ) -> None:
+        self.__size = size
+        self.__state = 0
+        self.__start = start
+        self.__goal = goal
+        if goal == -1:
+            self.__goal = size * size - 1
 
     def step(self, a):
         if a == 0:
@@ -17,31 +24,30 @@ class GridWorld:
 
         reward = -1
         done = self.__is_done()
-        return (self.x, self.y), reward, done
+        return self.__state, reward, done
 
-    def reset(self):
-        self.x = 0
-        self.y = 0
-        return (self.x, self.y)
+    def reset(self) -> None:
+        self.__state = self.__start
 
-    def get_state(self):
-        return (self.x, self.y)
+    @property
+    def state(self):
+        return self.__state
     
     def __move_left(self): 
-        if self.x > 0:
-            self.x -=1
+        if self.__state % self.__size != 0:
+            self.__state -= 1
 
     def __move_right(self):
-        if self.x < self.w:
-            self.x += 1
+        if self.__state % self.__size != self.__size - 1:
+            self.__state += 1
     
     def __move_up(self): 
-        if self.y > 0:
-            self.y -= 1
+        if self.__state >= self.__size:
+            self.__state -= self.__size
 
     def __move_down(self): 
-        if self.y < self.h:
-            self.y += 1
+        if self.__state < self.__size * (self.__size - 1):
+            self.__state += self.__size
 
     def __is_done(self):
-        return (self.x, self.y) == (self.w, self.h)
+        return self.__state == self.__goal

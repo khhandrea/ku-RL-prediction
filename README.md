@@ -2,6 +2,8 @@
 
 ## TODO
 - DP 
+- MC
+- TD
 
 ## Execution
 ### Docker
