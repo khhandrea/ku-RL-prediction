@@ -12,14 +12,14 @@ class GridWorld:
         if goal == -1:
             self.__goal = size * size - 1
 
-    def step(self, a):
-        if a == 0:
+    def step(self, action):
+        if action == 0:
             self.__move_left()
-        elif a == 1:
+        elif action == 1:
             self.__move_up()
-        elif a == 2:
+        elif action == 2:
             self.__move_right()
-        elif a == 3:
+        elif action == 3:
             self.__move_down()
 
         reward = -1
@@ -28,9 +28,6 @@ class GridWorld:
 
     def reset(self) -> None:
         self.__state = self.__start
-
-    @property
-    def state(self):
         return self.__state
     
     def __move_left(self): 

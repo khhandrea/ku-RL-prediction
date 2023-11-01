@@ -45,7 +45,7 @@ def train_DP(
                     next_v += transition[state, next_state, action] * old_vs[next_state]
                 q = reward + gamma * next_v
                 new_v += 0.25 * q
-            vs[state] = round(new_v, 2)
+            vs[state] = new_v
 
     # Save
     write_result('DP', 0, vs)

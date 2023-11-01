@@ -8,58 +8,54 @@
 from typing import Tuple
 
 import numpy as np
-from matplotlib import pyplot as plt
 
-def __file_path(experiment: str, step: int=0) -> None:
-    return f'{experiment}-{step}.txt'
+def __file_path(experiment: str, episode_num: int=0) -> None:
+    return f'{experiment}-{episode_num}.txt'
 
 def write_result(
         experiment: str,
-        step: int,
+        episode_num: int,
         vs: np.ndarray,
-        mean: np.ndarray=None,
+        means: np.ndarray=None,
         std: np.ndarray=None
         ) -> None:
-    path = __file_path(experiment, step)
-    vs = ' '.join(map(str, [v for v in vs.reshape(16,)])) + '\n'
+    path = __file_path(experiment, episode_num)
+    np2line = lambda arr: ' '.join(map(str, arr)) + '\n'
+
     with open(path, 'w') as file:
-        file.write(vs)
-        if mean == None:
-            pass
-        if std == None:
-            pass
-    print(f"saved to {path}")
+        file.write(np2line(vs))
+
+        if experiment != 'DP':
+            file.write(np2line(means))
+            file.write(np2line(std))
 
 def read_result(
         experiment: str,
-        step: int=0,
+        episode_num: int=0,
         size: int=4
         ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    path = __file_path(experiment, step)
-    line2np = lambda line: np.array(list(map(float, line.split()))).reshape(size * size)
+    path = __file_path(experiment, episode_num)
+    line2np = lambda line: np.array(list(map(float, line.split())))
 
-    if experiment == 'DP':
-        with open(path, 'r') as file:
-            line = file.readline()
-        vs = line2np(line)
-        
+    
+    with open(path, 'r') as file:
+        line = file.readline()
+    vs = line2np(line)
+
+    if experiment == 'DP':    
         return vs, None, None
     else:
-        if step != 0:
-            experiments = ('MC', 'TD1', 'TD3')
-            data = {}
-            for experiment in experiments:
-                with open(path) as file:
-                    data[experiment] = file.readlines()
+        with open(path) as file:
+            lines = file.readlines()
 
-                # vs
-                data[experiment][0] = line2np(data[experiment][0])
-                # mean
-                data[experiment][1]
-                # bias
-                data[experiment][2]
-        else:
-            print('invalid parameters')
+        # vs
+        vs = line2np(lines[0])
+        # means
+        means = line2np(lines[1])
+        # stds
+        stds = line2np(lines[2])
+
+    return vs, means, stds
 
 def get_gridlike(state: np.ndarray, size=4) -> np.ndarray:
     return state.reshape((4, -1))

@@ -1,20 +1,65 @@
-from implements.RL_algo import RLAgent, RLTrainer
+from sys import argv
 
-class MCAgent(RLAgent):
-    def select_action(self, state):
-        print('select_action')
+import numpy as np
 
-    def update(self):
-        print('update')
+from implements.agent import Agent
+from implements.data_handler import write_result, read_result
+from implements.data_handler import get_gridlike
+from implements.world import GridWorld
 
-    def show_v_table(self):
-        print('show_v_table')
 
-class MCTrainer(RLTrainer):
-    def train(self):
-        MC_agent = MCAgent()
-        
-        print('train')
-        MC_agent.select_action(None)
-        MC_agent.update()
-        MC_agent.show_v_table()
+def train_MC(
+    *,
+    size: int=4,
+    alpha: float=0.1,
+    gamma: float=1.0,
+    reward: int=-1,
+    episode_num: int=100,
+    experiment_num: int=30,
+    true_vs: np.ndarray
+):
+    # Initialize
+    state_num = size * size
+    population_errors = []
+    means = np.array([])
+    stds = np.array([])
+    agent = Agent()
+    env = GridWorld()
+
+    # Train
+    for experiment in range(experiment_num):
+        vs = np.zeros(state_num)
+        errors = []
+        for episode in range(episode_num):
+            MAE = sum([abs(v - true_v) for v, true_v in zip(vs, true_vs)]) / state_num
+            errors.append(MAE)
+
+            state = env.reset()
+            done = False
+            history = []
+            while not done:
+                action = agent.select_action(state)
+                state, reward, done = env.step(action)
+                history.append((state, reward))
+
+            G = 0
+            for state, reward in history[:-1][::-1]:
+                G = reward + gamma * G
+                vs[state] = vs[state] + alpha * (G - vs[state])
+
+        population_errors.append(errors)
+    population_errors = np.array(population_errors)
+
+    means = np.mean(population_errors, axis=0)
+    stds = np.std(population_errors, axis=0)
+
+    # Save
+    write_result('MC', episode_num, vs, means, stds)
+
+if __name__ == '__main__':
+    episode_num = int(argv[1])
+
+    true_vs, _, _ = read_result('DP')
+    train_MC(episode_num=episode_num, true_vs=true_vs)
+    vs, means, stds = read_result('MC', episode_num)
+    print(get_gridlike(vs))
