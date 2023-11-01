@@ -9,8 +9,8 @@ from typing import Tuple
 
 import numpy as np
 
-def __file_path(experiment: str, episode_num: int=0) -> None:
-    return f'{experiment}-{episode_num}.txt'
+def __file_path(experiment: str, episode_num: int=0) -> str:
+    return f'data/{experiment}-{episode_num}.txt'
 
 def write_result(
         experiment: str,
