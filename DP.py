@@ -47,6 +47,8 @@ def train_DP(
                 new_v += 0.25 * q
             vs[state] = new_v
 
+    print(f"DP evaluation completed.")
+
     # Save
     write_result('DP', 0, vs)
 

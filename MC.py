@@ -11,7 +11,7 @@ from implements.world import GridWorld
 def train_MC(
     *,
     size: int=4,
-    alpha: float=0.1,
+    alpha: float=0.01,
     gamma: float=1.0,
     reward: int=-1,
     episode_num: int=100,
@@ -49,6 +49,8 @@ def train_MC(
 
         population_errors.append(errors)
     population_errors = np.array(population_errors)
+
+    print(f"MC for {episode_num} episodes prediction completed.")
 
     means = np.mean(population_errors, axis=0)
     stds = np.std(population_errors, axis=0)
