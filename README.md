@@ -7,6 +7,11 @@
 
 ## Execution
 ### Docker
+```
+docker build -t ku-ossp2-assignment1 .
+docker run --rm -it -v path/to/directory:/volume -p 5000:8888 ku-ossp2-assignment1
+# localhost:5000으로 접속 후 터미널의 token을 비밀번호로 입력하여 jupyter notebook 접속
+```
 
 ### DP\.py
 Reinforcement learning with dynamic programming
@@ -38,7 +43,7 @@ TD.py 3 1000
 ```
 
 ### experiment\.ipynb
-Experiment DP until convergence / MC, TD, 3step-TD with 100, 1000, 10000, 100000 steps and plot the data
+Experiment DP until convergence / MC, TD, 3step-TD with 100, 1000, 10000 steps and plot the data
 
 
 ## Subject
