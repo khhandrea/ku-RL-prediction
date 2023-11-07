@@ -1,10 +1,5 @@
 # Reinforcement learning planning & prediction
 
-## TODO
-- DP 
-- MC
-- TD
-
 ## Execution
 ### Docker
 ```
