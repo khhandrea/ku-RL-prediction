@@ -7,7 +7,7 @@ from implements.data_handler import get_gridlike
 
 def train_DP(
         size: int = 4,
-        gamma: float = 1.0,
+        gamma: float = 0.99,
         reward: int = -1,
         ):
     # Initialize

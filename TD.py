@@ -39,7 +39,7 @@ def train_TD(
             step = 0
             done = False
             history = deque([(state, None)])
-            prev_return = 0 # n step return for t-1
+            prev_return = 0 # n step return for t-n
             while not done:
                 step += 1
                 action = agent.select_action(state)
@@ -48,7 +48,7 @@ def train_TD(
 
                 # Calculate return    
                 if step <= n_step:
-                    prev_return += gamma ** (n_step - 1) * reward
+                    prev_return += gamma ** (step - 1) * reward
 
                 if step >= n_step:
                     prev_state, prev_reward = history.popleft()
@@ -65,7 +65,8 @@ def train_TD(
                     
                     # Update vs
                     vs[prev_state] += alpha * (target - vs[prev_state])
-                    
+
+
             # Update terminal vs
             while len(history) > 1:
                 prev_state, prev_reward = history.popleft()

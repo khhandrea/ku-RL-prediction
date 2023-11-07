@@ -12,7 +12,7 @@ def train_MC(
     *,
     size: int=4,
     alpha: float=0.01,
-    gamma: float=1.0,
+    gamma: float=0.9,
     reward: int=-1,
     episode_num: int=100,
     experiment_num: int=30,
